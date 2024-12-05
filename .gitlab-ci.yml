@@ -1,10 +1,10 @@
 stages:
+  - clean
   - scan
   - upload_report
   - build
   - push_images
   - sync_repos
-  - clean
 
 variables:
   DOCKER_HOST: "tcp://10.10.1.4:2375"
@@ -19,14 +19,14 @@ variables:
 build_artery:
   stage: build
   script:
-    - docker build -t $NEXUS_ADDRESS/$IMAGE_NAMESPACE/$ARTERY_IMAGE:$TAG -f artery/Dockerfile .
+    - docker build -t $NEXUS_ADDRESS/$IMAGE_NAMESPACE/$ARTERY_IMAGE:$TAG -f artery/Dockerfile . --no-cache
   only:
     - tags
 
 build_opencda:
   stage: build
   script:
-    - docker build -t $NEXUS_ADDRESS/$IMAGE_NAMESPACE/$OPENCDA_IMAGE:$TAG -f opencda/Dockerfile .
+    - docker build -t $NEXUS_ADDRESS/$IMAGE_NAMESPACE/$OPENCDA_IMAGE:$TAG -f opencda/Dockerfile . --no-cache
   only:
     - tags
 
@@ -79,7 +79,7 @@ clean_nexus:
     - incomplete_uploads_task_id=$(curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks" | grep incomplete_uploads -B 1 | grep id | awk -F '"' '{print $4}')
     - curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks/$incomplete_uploads_task_id/run" -X POST
 
-    - compact_blobstore_task_id=$(curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks" | grep compact_blobstore -B 1 | grep id | awk -F '"' '{print $4}')
-    - curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks/$compact_blobstore_task_id/run" -X POST
+    # - compact_blobstore_task_id=$(curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks" | grep compact_blobstore -B 1 | grep id | awk -F '"' '{print $4}')
+    # - curl -u $NEXUS_USER:$NEXUS_PASSWORD "http://$NEXUS_API_ADDRESS/service/rest/v1/tasks/$compact_blobstore_task_id/run" -X POST
   only:
     - tags
